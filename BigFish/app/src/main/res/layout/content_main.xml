@@ -7,7 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="crown.dafish.com.dafishtv.MainActivity">
+    tools:context="crown.dafish.com.dafishtv.MainActivity"
+    android:background="@drawable/background">
 
     <SurfaceView
         android:id="@+id/player_surface"
@@ -53,7 +54,6 @@
                 android:focusable="true"/>
 
         </RelativeLayout>
-
 
     </LinearLayout>
 

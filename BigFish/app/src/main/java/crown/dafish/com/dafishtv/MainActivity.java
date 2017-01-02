@@ -246,6 +246,7 @@ public class MainActivity extends Activity {
 
     private void initPlayer() {
         mVideoSurfaceView = (SurfaceView) findViewById(R.id.player_surface);
+        mVideoSurfaceView.setVisibility(View.GONE);
         mSurfaceHolder = mVideoSurfaceView.getHolder();
         mSurfaceHolder.addCallback(mSurfaceCallback);
         mVideoSurfaceView.setOnClickListener(new View.OnClickListener() {
@@ -278,8 +279,8 @@ public class MainActivity extends Activity {
         mKSYMediaPlayer.setOnErrorListener(mOnErrorListener);
 //        mKSYMediaPlayer.setOnSeekCompleteListener(mOnSeekCompletedListener);
         mKSYMediaPlayer.setScreenOnWhilePlaying(true);
-        mKSYMediaPlayer.setBufferTimeMax(30.0f);
-        mKSYMediaPlayer.setTimeout(5, 30);
+        mKSYMediaPlayer.setBufferTimeMax(300.0f);
+        mKSYMediaPlayer.setTimeout(5, 300);
 
         if (mUseHwCodec) {
             //硬解264&265
@@ -390,6 +391,7 @@ public class MainActivity extends Activity {
             //start player
             mKSYMediaPlayer.start();
             mLoading.setVisibility(View.GONE);
+            mVideoSurfaceView.setVisibility(View.VISIBLE);
             Toast.makeText(MainActivity.this, "开始播放节目", Toast.LENGTH_LONG).show();
             //set progress
             setVideoProgress(0);
@@ -518,6 +520,9 @@ public class MainActivity extends Activity {
 //            mKSYMediaPlayer.stop();
             mKSYMediaPlayer.reset();
             mKSYMediaPlayer.setDisplay(mSurfaceHolder);
+            mKSYMediaPlayer.setScreenOnWhilePlaying(true);
+            mKSYMediaPlayer.setBufferTimeMax(30.0f);
+            mKSYMediaPlayer.setTimeout(5, 30);
         }
         mCurrentUrl = url;
 //        mCurrentUrl = "rtmp://live.hkstv.hk.lxdns.com/live/hks";
@@ -627,8 +632,8 @@ public class MainActivity extends Activity {
                 case Constants.TV_GUZHUANGJUCHANGTV:
                     resId = R.id.guzhuangjc;
                     break;
-                case Constants.TV_HUNANSTV:
-                    resId = R.id.hunanstv;
+                case Constants.TV_BEIJINGSTV:
+                    resId = R.id.beijingstv;
                     break;
                 case Constants.TV_JINGPANZONGYITV:
                     resId = R.id.saishijx;

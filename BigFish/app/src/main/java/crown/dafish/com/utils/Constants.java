@@ -17,10 +17,10 @@ public class Constants {
     /**
      * 电视频道地址
      */
-    public static final String TV_BASE_URL = "http://103.16.255.241:8088/ysten-business/live/";
+    public static final String TV_BASE_URL = "http://103.198.18.1:8082/";
 
+    public static final String TV_BEIJINGSTV = "beijingstv";
     public static final String TV_GUANGDONGSTV = "guangdongstv";
-    public static final String TV_HUNANSTV = "hunanstv";
     public static final String TV_DONGFANGSTV = "dongfangstv";
     public static final String TV_KAKUKATONGTV = "kakukaton";
     public static final String TV_GUZHUANGJUCHANGTV = "guzhuangjc";

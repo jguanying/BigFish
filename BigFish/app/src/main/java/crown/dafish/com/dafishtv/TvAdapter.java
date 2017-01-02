@@ -67,8 +67,8 @@ public class TvAdapter extends BaseAdapter {
             case Constants.TV_DONGFANGSTV:
                 res = R.drawable.df;
                 break;
-            case Constants.TV_HUNANSTV:
-                res = R.drawable.hn;
+            case Constants.TV_BEIJINGSTV:
+                res = R.drawable.bj;
                 break;
             case Constants.TV_KAKUKATONGTV:
                 res = R.drawable.sr;
