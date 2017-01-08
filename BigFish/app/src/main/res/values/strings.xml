@@ -7,17 +7,17 @@
     <string name="action_settings">Settings</string>
 
     <string-array name="program_id">
-        <item>beijingstv</item>
-        <item>guangdongstv</item>
         <item>dongfangstv</item>
+        <item>guangdongstv</item>
+        <item>beijingstv</item>
         <item>kakukaton</item>
         <item>guzhuangjc</item>
         <item>saishijx</item>
     </string-array>
     <string-array name="tv_url">
-        <item>TV1031.m3u8</item>
-        <item>TV1008.m3u8</item>
         <item>TV1006.m3u8</item>
+        <item>TV1008.m3u8</item>
+        <item>TV1031.m3u8</item>
         <item>TV1030.m3u8</item>
         <item>TV4002.m3u8</item>
         <item>TV4005.m3u8</item>

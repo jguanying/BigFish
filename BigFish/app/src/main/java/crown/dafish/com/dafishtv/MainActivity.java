@@ -386,7 +386,7 @@ public class MainActivity extends Activity {
             mVideoHeight = mKSYMediaPlayer.getVideoHeight();
 
             // Set Video Scaling Mode
-            mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+            mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
 
             //start player
             mKSYMediaPlayer.start();
