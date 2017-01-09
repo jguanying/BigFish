@@ -641,7 +641,7 @@ public class MainActivity extends Activity {
         if (mProgramData.containsKey(id)) {
             ProgramData data = mProgramData.get(id);
             List<ProgramModel> list = data.getPrograms();
-            int resId = R.id.guangdongstv;
+            int resId = 0;
             switch (id) {
                 case Constants.TV_DONGFANGSTV:
                     resId = R.id.dongfangstv;

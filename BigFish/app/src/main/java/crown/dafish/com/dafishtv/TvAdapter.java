@@ -59,7 +59,7 @@ public class TvAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        int res = R.drawable.gd;
+        int res = 0;
         switch (mDatas.get(position).getId()) {
             case Constants.TV_GUANGDONGSTV:
                 res = R.drawable.gd;
