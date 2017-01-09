@@ -155,6 +155,10 @@ public class MainActivity extends Activity {
 
     private TimeBar mTimeBar;
 
+    private ImageView mClose;
+
+    private View mSlideBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -240,7 +244,23 @@ public class MainActivity extends Activity {
             lp.width = metrics.widthPixels / 3;
             mFiveMinuteInPixel = (int)(1f *(metrics.widthPixels - lp.width) / UNIT_IN_PAGE + 0.5f);
         }
+        mClose = (ImageView) findViewById(R.id.close);
+        mClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tonggleProgramPanel();
+            }
+        });
 
+        mSlideBtn = findViewById(R.id.slide_btn);
+        mSlideBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
         mDrawerLayout.openDrawer(GravityCompat.START);
     }
 
@@ -652,7 +672,7 @@ public class MainActivity extends Activity {
                     programName.setText(model.getProgramName());
 
                     TextView programDuration = (TextView) item.findViewById(R.id.program_duration);
-                    programDuration.setText(model.getStartTime() + "-" + model.getEndTime());
+                    programDuration.setText(model.getStartTime().substring(0,5) + "-" + model.getEndTime().substring(0,5));
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
                     layoutParams.height = mListHeight / mTvModels.size();
 
@@ -696,9 +716,11 @@ public class MainActivity extends Activity {
             //蒙层
             computeMaskPosition();
             mMask.setVisibility(View.VISIBLE);
+            mClose.setVisibility(View.VISIBLE);
         } else {
             mProgramLayoutPanel.setVisibility(View.GONE);
             mMask.setVisibility(View.GONE);
+            mClose.setVisibility(View.GONE);
         }
 
         if (mErrorRequest.keySet().size() != 0) {
