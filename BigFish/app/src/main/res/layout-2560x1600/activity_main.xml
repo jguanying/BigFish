@@ -74,7 +74,7 @@
                 android:layout_marginLeft="20dp"
                 android:orientation="vertical">
                 <LinearLayout
-                    android:id="@+id/beijingstv"
+                    android:id="@+id/dongfangstv"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
@@ -86,7 +86,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"/>
                 <LinearLayout
-                    android:id="@+id/dongfangstv"
+                    android:id="@+id/beijingstv"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
