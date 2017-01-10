@@ -50,7 +50,7 @@ public class TimeBar extends View{
     /**
      * 一个单位占像素
      */
-    private int mUnitInPixel = 10;
+    private float mUnitInPixel = 10;
 
     /**
      * 单位数
@@ -97,7 +97,7 @@ public class TimeBar extends View{
         mTextHeight = Util.dp2px(context,mTextHeight);
 
         mHeight = mLongHeight + mPadding * 2 + mTextHeight;
-        mWidth = Util.dp2px(context,mUnitInPixel * mUnitCount + mPadding * 2);
+        mWidth = Util.dp2px(context,(int)(mUnitInPixel * mUnitCount + 0.5) + mPadding * 2);
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setColor(Color.WHITE);
@@ -126,7 +126,7 @@ public class TimeBar extends View{
         postInvalidateOnAnimation();
     }
 
-    public void setUnitInPixel(int unitInPixel) {
+    public void setUnitInPixel(float unitInPixel) {
         mUnitInPixel = unitInPixel;
         postInvalidateOnAnimation();
     }
@@ -168,7 +168,7 @@ public class TimeBar extends View{
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         mHeight = mLongHeight + mPadding * 2 + mTextHeight;
-        mWidth = mUnitInPixel * mUnitCount + mPadding * 2;
+        mWidth = (int)(mUnitInPixel * mUnitCount + 0.5) + mPadding * 2;
         setMeasuredDimension(mWidth, mHeight);
     }
 

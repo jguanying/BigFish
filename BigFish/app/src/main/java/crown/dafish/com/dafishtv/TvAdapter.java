@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import crown.dafish.com.model.TvModel;
 import crown.dafish.com.utils.Constants;
+import crown.dafish.com.utils.Util;
 
 /**********************************************************************
  * @author sundi
@@ -83,7 +84,7 @@ public class TvAdapter extends BaseAdapter {
         viewHolder.mImage.setImageResource(res);
         if (mItemHeight > 0) {
             ViewGroup.LayoutParams lp = viewHolder.mImage.getLayoutParams();
-            lp.height = mItemHeight / mDatas.size();
+            lp.height = (int)(1f * mItemHeight / mDatas.size()) - Util.dp2px(mContext,2);
         }
         return convertView;
     }

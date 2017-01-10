@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
     /**
      * 每5分钟对应的像素
      */
-    private int mFiveMinuteInPixel;
+    private float mFiveMinuteInPixel;
 
     /**
      * 一个单位5分钟，一屏显示30个单位
@@ -242,7 +242,7 @@ public class MainActivity extends Activity {
         ViewGroup.LayoutParams lp = mListView.getLayoutParams();
         if (metrics.widthPixels > 0) {
             lp.width = metrics.widthPixels / 3;
-            mFiveMinuteInPixel = (int)(1f *(metrics.widthPixels - lp.width) / UNIT_IN_PAGE + 0.5f);
+            mFiveMinuteInPixel = (1f *(metrics.widthPixels - lp.width) / UNIT_IN_PAGE);
         }
         mClose = (ImageView) findViewById(R.id.close);
         mClose.setOnClickListener(new View.OnClickListener() {
@@ -670,22 +670,27 @@ public class MainActivity extends Activity {
                     View item = mLayoutInflater.inflate(R.layout.program_item,null,false);
                     TextView programName = (TextView) item.findViewById(R.id.program_name);
                     programName.setText(model.getProgramName());
-
                     TextView programDuration = (TextView) item.findViewById(R.id.program_duration);
                     programDuration.setText(model.getStartTime().substring(0,5) + "-" + model.getEndTime().substring(0,5));
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
                     layoutParams.height = mListHeight / mTvModels.size();
 
                     int duration = getProgramDuration(model);
+
                     if (i == 0) {
                         long zero = ConvertUtil.string2Date("00:00:00",FORMAT).getTime();
                         long start = ConvertUtil.string2Date(model.getStartTime(),FORMAT).getTime();
-                        int firstPosition = (int)(1f * (start - zero) / (1000 * 60) + 0.5); //分钟
-                        layoutParams.leftMargin = (int) ((1f * firstPosition / FIVE_MINUTE) * mFiveMinuteInPixel);
+                        int firstPosition = (int)(1f * (start - zero) / (1000 * 60f) + 0.5); //分钟
+                        layoutParams.leftMargin = (int) ((1f * firstPosition / FIVE_MINUTE) * mFiveMinuteInPixel + 0.5);
                     }
 
-                    layoutParams.width = (int)((1f * duration / FIVE_MINUTE) * mFiveMinuteInPixel);
+                    layoutParams.width = (int)((1f * Math.abs(duration) / FIVE_MINUTE) * mFiveMinuteInPixel + 0.5);
+                    Log.d(TAG,"layoutParams.width " + (1f * Math.abs(duration) / FIVE_MINUTE) * mFiveMinuteInPixel);
+
                     container.addView(item,layoutParams);
+                    if (duration < 0) {
+                        break;
+                    }
                 }
             }
 
@@ -694,7 +699,6 @@ public class MainActivity extends Activity {
     }
 
     private int getProgramDuration(ProgramModel programModel) {
-        ;
         int duration = 0;
         long start = ConvertUtil.string2Date(programModel.getStartTime(),FORMAT).getTime();
         long end = ConvertUtil.string2Date(programModel.getEndTime(),FORMAT).getTime();
@@ -702,10 +706,12 @@ public class MainActivity extends Activity {
         long oneMinuteToZero = ConvertUtil.string2Date("23:59:00",FORMAT).getTime();
         Log.d(TAG,programModel.getStartTime() + "=Start:" + start + "###" +programModel.getEndTime() + "=End:" + end);
         if (start <= end) {
-            duration = (int)(end - start) / (1000 * 60); //分钟
+            duration = (int)((end - start) / (1000 * 60f)); //分钟
         } else {
-            Log.d(TAG,"Start < End");
-            duration = 1 + (int) (oneMinuteToZero - start + end - zero) / (1000 * 60) ;
+//            duration = 1 + (int) (oneMinuteToZero - start + end - zero) / (1000 * 60) ;
+            duration = 1 + (int) ((oneMinuteToZero - start) / (1000 * 60f));
+            Log.d(TAG,"Start > End " + duration);
+            duration = -1 * duration;
         }
         return  duration;
     }
@@ -773,7 +779,7 @@ public class MainActivity extends Activity {
     }
 
     private void computeTimePosition(final int nowPosition) {
-        int position = nowPosition - mFiveMinuteInPixel * 2;
+        int position = (int)(nowPosition - mFiveMinuteInPixel * 2);
         if (position < 0) {
             position = 0;
         }
