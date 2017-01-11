@@ -248,7 +248,8 @@ public class MainActivity extends Activity {
         mClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tonggleProgramPanel();
+               tonggleProgramPanel();
+                mClose.setVisibility(View.GONE);
             }
         });
 
