@@ -25,7 +25,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -192,6 +191,7 @@ public class MainActivity extends Activity {
                 if (mProgramLayoutPanel.getVisibility() == View.VISIBLE) {
                     mProgramLayoutPanel.setVisibility(View.GONE);
                     mMask.setVisibility(View.GONE);
+                    mClose.setVisibility(View.GONE);
                 }
             }
 
@@ -389,7 +389,7 @@ public class MainActivity extends Activity {
     private IMediaPlayer.OnCompletionListener mOnCompletionListener = new IMediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(IMediaPlayer mp) {
-            Toast.makeText(MainActivity.this, "节目已播放完毕", Toast.LENGTH_LONG).show();
+//            Toast.makeText(MainActivity.this, "节目已播放完毕", Toast.LENGTH_LONG).show();
             mDrawerLayout.openDrawer(GravityCompat.START);
             mLoading.setVisibility(View.GONE);
 //            videoPlayEnd();
@@ -413,7 +413,7 @@ public class MainActivity extends Activity {
             mKSYMediaPlayer.start();
             mLoading.setVisibility(View.GONE);
             mVideoSurfaceView.setVisibility(View.VISIBLE);
-            Toast.makeText(MainActivity.this, "开始播放节目", Toast.LENGTH_LONG).show();
+//            Toast.makeText(MainActivity.this, "开始播放节目", Toast.LENGTH_LONG).show();
             //set progress
             setVideoProgress(0);
         }
