@@ -1,6 +1,7 @@
 package crown.dafish.com.model;
 
 /**********************************************************************
+ * 节目单
  * @author sundi
  * @类名 ProgramModel
  * @包名 crown.dafish.com.model

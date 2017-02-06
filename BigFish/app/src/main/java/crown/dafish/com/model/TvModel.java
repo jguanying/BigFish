@@ -17,6 +17,11 @@ public class TvModel {
     private String mTvName;
 
     /**
+     * 频道图标
+     */
+    private String mTvIconPath;
+
+    /**
      * 频道ID
      */
     private String mId;
@@ -43,5 +48,13 @@ public class TvModel {
 
     public void setUrl(String url) {
         mUrl = url;
+    }
+
+    public String getTvIconPath() {
+        return mTvIconPath;
+    }
+
+    public void setTvIconPath(String tvIconPath) {
+        mTvIconPath = tvIconPath;
     }
 }

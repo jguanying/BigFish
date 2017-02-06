@@ -46,7 +46,7 @@
                 android:layout_height="0dp"
                 android:cacheColorHint="#00000000"
                 android:listSelector="#232323"
-                android:dividerHeight="2dp"
+                android:dividerHeight="@dimen/divider_height"
                 android:scrollbars="none"
                 android:layout_weight="6"/>
             <ImageView
@@ -69,59 +69,35 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <LinearLayout
-                android:id="@+id/program_container"
+            <crown.dafish.com.view.ScrollViewEx
+                android:id="@+id/scrollView"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="20dp"
-                android:orientation="vertical">
-                <LinearLayout
-                    android:id="@+id/dongfangstv"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"/>
-                <LinearLayout
-                    android:id="@+id/guangdongstv"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"/>
-                <LinearLayout
-                    android:id="@+id/beijingstv"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"/>
-                <LinearLayout
-                    android:id="@+id/kakukaton"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"/>
-                <LinearLayout
-                    android:id="@+id/guzhuangjc"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"/>
-                <LinearLayout
-                    android:id="@+id/saishijx"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"/>
+                android:layout_height="match_parent">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/program_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="20dp"
+                        android:orientation="vertical">
 
 
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/mask"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone"
-                android:layout_marginLeft="20dp"
-                android:background="#55239923"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/mask"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:background="#55239923"
+                        android:orientation="vertical"
+                        android:visibility="gone"/>
+                </FrameLayout>
+            </crown.dafish.com.view.ScrollViewEx>
             <crown.dafish.com.view.TimeBar
                 android:id="@+id/timeBar"
                 android:layout_width="match_parent"

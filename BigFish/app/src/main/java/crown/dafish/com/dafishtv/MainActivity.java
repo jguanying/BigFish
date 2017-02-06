@@ -12,11 +12,13 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -45,12 +47,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import crown.dafish.com.model.Channel;
 import crown.dafish.com.model.ProgramData;
+import crown.dafish.com.model.ProgramInfo;
 import crown.dafish.com.model.ProgramModel;
 import crown.dafish.com.model.TvModel;
 import crown.dafish.com.utils.Constants;
 import crown.dafish.com.utils.ConvertUtil;
 import crown.dafish.com.utils.Util;
+import crown.dafish.com.view.ScrollViewEx;
 import crown.dafish.com.view.TimeBar;
 
 public class MainActivity extends Activity {
@@ -158,6 +163,15 @@ public class MainActivity extends Activity {
 
     private View mSlideBtn;
 
+    private ScrollViewEx mScrollView;
+
+    private Channel mChannel;
+
+    private  ArrayMap<String,LinearLayout> mRaws = new ArrayMap<>();
+
+    private boolean isListScroll = false;
+
+    private boolean isProgramScroll = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -174,6 +188,25 @@ public class MainActivity extends Activity {
         mTimeBar = (TimeBar) findViewById(R.id.timeBar);
         mLoading = (ProgressBar) findViewById(R.id.progressBar);
         mProgramLayoutPanel = findViewById(R.id.program_panel);
+        mScrollView = (ScrollViewEx) findViewById(R.id.scrollView);
+        mScrollView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                isProgramScroll = true;
+                isListScroll = false;
+                return false;
+            }
+        });
+        mScrollView.setOnScrollChangeListener(new ScrollViewEx.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(int l, int t, int oldl, int oldt) {
+                if (!isListScroll) {
+                    int scroll = t - oldt;
+                    mListView.scrollListBy(scroll);
+
+                }
+            }
+        });
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -211,15 +244,41 @@ public class MainActivity extends Activity {
         });
 
         mListView = (ListView) findViewById(R.id.tv_list);
-        for (int i = 0; i < mProgramId.length; i++) {
-            TvModel tvModel = new TvModel();
-            tvModel.setId(mProgramId[i]);
-            tvModel.setUrl(Constants.TV_BASE_URL + mTvUrl[i]);
-            mTvModels.add(tvModel);
-        }
+        mListView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                isProgramScroll = false;
+                isListScroll = true;
+                return false;
+            }
+        });
+        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
 
-        TvAdapter adapter = new TvAdapter(getApplicationContext(), mTvModels);
-        mListView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+                if (totalItemCount > 0 && !isProgramScroll) {
+                    int position = firstVisibleItem * (getResources().getDimensionPixelOffset(R.dimen.item_height)
+                            + getResources().getDimensionPixelOffset(R.dimen.divider_height));
+                    int top = view.getChildAt(0).getTop();
+                    position = position - top;
+                    mScrollView.scrollTo(0, position);
+                }
+            }
+        });
+
+//        for (int i = 0; i < mProgramId.length; i++) {
+//            TvModel tvModel = new TvModel();
+//            tvModel.setId(mProgramId[i]);
+//            tvModel.setUrl(Constants.TV_BASE_URL + mTvUrl[i]);
+//            mTvModels.add(tvModel);
+//        }
+
+
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -230,8 +289,8 @@ public class MainActivity extends Activity {
         mListView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                mListHeight = mListView.getMeasuredHeight();
-                ((TvAdapter) mListView.getAdapter()).setItemHeight(mListHeight);
+//                mListHeight = mListView.getMeasuredHeight();
+//                ((TvAdapter) mListView.getAdapter()).setItemHeight(mListHeight);
                 mListView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 Rect rect = new Rect();
                 mListView.getGlobalVisibleRect(rect);
@@ -262,7 +321,7 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        mDrawerLayout.openDrawer(GravityCompat.START);
+
     }
 
     private void initPlayer() {
@@ -310,9 +369,62 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void getChannel() {
+        if (mRequestQueue == null) {
+            mRequestQueue = Volley.newRequestQueue(this);
+        }
+
+        StringRequest request = new StringRequest(Request.Method.GET, Constants.PROGRAM_INFO_BASE_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    Gson gson = new Gson();
+                    Log.d(TAG,"channel: " + response);
+//                    response = "{ \"programs\" : [ { \"logo\" : \"bj.png\", \"title\" : \"北京\", \"source\" : \"http://103.198.18.22:8088/live/bjtv.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"beijingstv\" }, { \"logo\" : \"gd.png\", \"title\" : \"广东\", \"source\" : \"http://103.198.18.22:8088/live/ngdtvsd.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"gd\" }, { \"logo\" : \"df.png\", \"title\" : \"东方\", \"source\" : \"http://103.198.18.22:8088/live/ndftvhd.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"df\" }, { \"logo\" : \"sr.png\", \"title\" : \"卡酷卡通\", \"source\" : \"http://103.198.18.22:8088/live/kkdh.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"kakukaton\" }, { \"logo\" : \"dsj.png\", \"title\" : \"古装剧场\", \"source\" : \"http://103.198.18.22:8088/live/gtjc.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"guzhuangjc\" }, { \"logo\" : \"zy.png\", \"title\" : \"赛事\", \"source\" : \"http://103.198.18.22:8088/live/wpzy.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"saishijx\" }, { \"logo\" : \"xw.png\", \"title\" : \"cctv-2\", \"source\" : \"http://103.198.18.22:8082/TV4020.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"cctv-2\" }, { \"logo\" : \"cj.png\", \"title\" : \"cctv-3\", \"source\" : \"http://103.198.18.22:8082/TV4013.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"cctv-3\"}, { \"logo\" : \"ms.png\", \"title\" : \"描述\", \"source\" : \"http://103.198.18.22:8082/TV3005.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"saishijx\"} ], \"info\" : { \"version\" : 1, \"customer\" : \"Crown\" } }";
+                    mChannel = gson.fromJson(response, Channel.class);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+                getProgramList();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "get channel error");
+            }
+        });
+
+        mRequestQueue.add(request);
+    }
 
     private void getProgramList() {
-        mRequestQueue = Volley.newRequestQueue(this);
+        if (mChannel != null) {
+            ArrayList<ProgramInfo> programInfos = mChannel.getPrograms();
+            if (programInfos == null) {
+                return;
+            }
+            for (int i = 0; i < programInfos.size(); i++) {
+                if (programInfos.get(i) == null) {
+                    break;
+                }
+                TvModel tvModel = new TvModel();
+                tvModel.setId(programInfos.get(i).getUuid());
+                tvModel.setUrl(programInfos.get(i).getSource());
+                tvModel.setTvName(programInfos.get(i).getTitle());
+                tvModel.setTvIconPath(Constants.PROGRAM_ICON_URL + programInfos.get(i).getLogo());
+                mTvModels.add(tvModel);
+                buildListRaw(programInfos.get(i).getUuid());
+            }
+            TvAdapter adapter = new TvAdapter(getApplicationContext(), mTvModels);
+            mListView.setAdapter(adapter);
+            mDrawerLayout.openDrawer(GravityCompat.START);
+            //蒙层
+            computeMaskPosition();
+        } else {
+            return;
+        }
+
         String date = ConvertUtil.date2String(new Date(),"yyyyMMdd");
         String start = "start=" + date + CONNECTOR;
         String end = "end=" + date;
@@ -327,11 +439,20 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void buildListRaw(String id) {
+        LinearLayout raw = new LinearLayout(this);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                getResources().getDimensionPixelSize(R.dimen.item_height) + getResources().getDimensionPixelSize(R.dimen.divider_height));
+        LinearLayout container = (LinearLayout) mProgramLayoutPanel.findViewById(R.id.program_container);
+        container.addView(raw,layoutParams);
+        mRaws.put(id,raw);
+    }
+
     private void makeRequest(final String id,final String url) {
         StringRequest request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d("TAG", response.toString());
+                Log.d(TAG, id + ":" + response.toString());
                 try {
                     JSONArray array = new JSONArray(response.toString());
                     if (array.length() > 0) {
@@ -361,7 +482,7 @@ public class MainActivity extends Activity {
             public void onErrorResponse(VolleyError error) {
                 String message = error.getLocalizedMessage();
                 if (message == null) {
-                    message = "UnknownError Happened When Get Program";
+                    message = "UnknownError Happened When Get ProgramInfo";
                 }
                 Log.e(TAG, message);
                 mErrorRequest.put(id,url);
@@ -642,28 +763,28 @@ public class MainActivity extends Activity {
         if (mProgramData.containsKey(id)) {
             ProgramData data = mProgramData.get(id);
             List<ProgramModel> list = data.getPrograms();
-            int resId = 0;
-            switch (id) {
-                case Constants.TV_DONGFANGSTV:
-                    resId = R.id.dongfangstv;
-                    break;
-                case Constants.TV_GUANGDONGSTV:
-                    resId = R.id.guangdongstv;
-                    break;
-                case Constants.TV_GUZHUANGJUCHANGTV:
-                    resId = R.id.guzhuangjc;
-                    break;
-                case Constants.TV_BEIJINGSTV:
-                    resId = R.id.beijingstv;
-                    break;
-                case Constants.TV_JINGPANZONGYITV:
-                    resId = R.id.saishijx;
-                    break;
-                case Constants.TV_KAKUKATONGTV:
-                    resId = R.id.kakukaton;
-                    break;
-            }
-            LinearLayout container = (LinearLayout) mProgramLayoutPanel.findViewById(resId);
+//            int resId = 0;
+//            switch (id) {
+//                case Constants.TV_DONGFANGSTV:
+//                    resId = R.id.dongfangstv;
+//                    break;
+//                case Constants.TV_GUANGDONGSTV:
+//                    resId = R.id.guangdongstv;
+//                    break;
+//                case Constants.TV_GUZHUANGJUCHANGTV:
+//                    resId = R.id.guzhuangjc;
+//                    break;
+//                case Constants.TV_BEIJINGSTV:
+//                    resId = R.id.beijingstv;
+//                    break;
+//                case Constants.TV_JINGPANZONGYITV:
+//                    resId = R.id.saishijx;
+//                    break;
+//                case Constants.TV_KAKUKATONGTV:
+//                    resId = R.id.kakukaton;
+//                    break;
+//            }
+            LinearLayout container = (LinearLayout) mRaws.get(id);
 
             if (list != null) {
                 for (int i = 0; i < list.size(); i++) {
@@ -674,8 +795,8 @@ public class MainActivity extends Activity {
                     TextView programDuration = (TextView) item.findViewById(R.id.program_duration);
                     programDuration.setText(model.getStartTime().substring(0,5) + "-" + model.getEndTime().substring(0,5));
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
-                    layoutParams.height = mListHeight / mTvModels.size();
-
+//                    layoutParams.height = mListHeight / mTvModels.size();
+                    layoutParams.height = Util.dp2px(this,70);
                     int duration = getProgramDuration(model);
 
                     if (i == 0) {
@@ -741,28 +862,34 @@ public class MainActivity extends Activity {
         Log.d(TAG,rect.toString());
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mProgramLayoutPanel.getLayoutParams();
         layoutParams.leftMargin = rect.right - rect.left;
-        FrameLayout.LayoutParams layoutParams1 = (FrameLayout.LayoutParams) mProgramLayoutPanel.findViewById(R.id.program_container).getLayoutParams();
-        layoutParams1.height = rect.bottom - rect.top;
-        layoutParams1.topMargin = rect.top;
 
-        //蒙层
-        computeMaskPosition();
+        FrameLayout.LayoutParams mScrollViewLayoutParams = (FrameLayout.LayoutParams) mScrollView.getLayoutParams();
+//        mScrollViewLayoutParams.leftMargin = rect.right - rect.left;
+        mScrollViewLayoutParams.height = rect.bottom - rect.top;
+        mScrollViewLayoutParams.topMargin = rect.top;
+
+
+        FrameLayout.LayoutParams layoutParams1 = (FrameLayout.LayoutParams) mProgramLayoutPanel.findViewById(R.id.program_container).getLayoutParams();
+//        layoutParams1.height = rect.bottom - rect.top;
+//        layoutParams1.topMargin = rect.top;
 
         //时间线
         FrameLayout.LayoutParams timeBarLayoutParams = (FrameLayout.LayoutParams) mTimeBar.getLayoutParams();
         timeBarLayoutParams.topMargin = rect.top - mTimeBar.getViewHeight();
         mTimeBar.setUnitInPixel(mFiveMinuteInPixel);
 
-        //取得节目列表
-        getProgramList();
+        getChannel();
+//        //取得节目列表
+//        getProgramList();
     }
 
     private void computeMaskPosition() {
         Rect rect = new Rect();
         mListView.getGlobalVisibleRect(rect);
         FrameLayout.LayoutParams maskLayoutParams = (FrameLayout.LayoutParams) mMask.getLayoutParams();
-        maskLayoutParams.topMargin = rect.top;
-        maskLayoutParams.height = rect.bottom - rect.top;
+//        maskLayoutParams.topMargin = rect.top;
+        maskLayoutParams.height = (int) ((getResources().getDimensionPixelSize(R.dimen.item_height) + getResources().getDimensionPixelSize(R.dimen.divider_height)) * mTvModels.size() + 0.5f);
+        Log.d("computeMaskPosition", "maskLayoutParams.height:" +maskLayoutParams.height);
         Calendar calendar = Calendar.getInstance();
         Date date = new Date();
         calendar.setTime(date);

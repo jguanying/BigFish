@@ -9,11 +9,20 @@ package crown.dafish.com.utils;
 public class Constants {
 
     /**
+     * 节目信息地址
+     */
+    public static final String PROGRAM_INFO_BASE_URL = "http://crown.da-fish.com:8888/service/channel?uuid=54321";
+
+    /**
      * 节目单基地址
      */
     public static final String PROGRAM_BASE_URL = "http://crown.da-fish.com:8888/service/program?";
     //"uuid=cctv-2&start=20161227&end=20161227";
 
+    /**
+     * 频道ICON地址
+     */
+    public static final String PROGRAM_ICON_URL = "http://crown.da-fish.com:8888/service/images?logo=";
     /**
      * 电视频道地址
      */
