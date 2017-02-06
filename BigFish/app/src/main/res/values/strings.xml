@@ -15,11 +15,11 @@
         <item>saishijx</item>
     </string-array>
     <string-array name="tv_url">
-        <item>TV1006.m3u8</item>
-        <item>TV1008.m3u8</item>
-        <item>TV1031.m3u8</item>
-        <item>TV1030.m3u8</item>
-        <item>TV4002.m3u8</item>
-        <item>TV4005.m3u8</item>
+        <item>ndftvhd.m3u8</item>
+        <item>ngdtvsd.m3u8</item>
+        <item>bjtv.m3u8</item>
+        <item>kkdh.m3u8</item>
+        <item>gtjc.m3u8</item>
+        <item>wpzy.m3u8</item>
     </string-array>
 </resources>

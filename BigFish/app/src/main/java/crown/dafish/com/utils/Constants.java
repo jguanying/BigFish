@@ -26,7 +26,7 @@ public class Constants {
     /**
      * 电视频道地址
      */
-    public static final String TV_BASE_URL = "http://103.198.18.1:8082/";
+    public static final String TV_BASE_URL = "http://demo.da-fish.com:8088/live/";
 
     public static final String TV_BEIJINGSTV = "beijingstv";
     public static final String TV_GUANGDONGSTV = "guangdongstv";
