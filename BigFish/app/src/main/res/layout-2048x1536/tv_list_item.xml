@@ -6,7 +6,7 @@
     <ImageView
         android:id="@+id/list_item_icon"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/item_height"
         android:padding="25dp"
         android:scaleType="centerInside"/>
     <TextView
