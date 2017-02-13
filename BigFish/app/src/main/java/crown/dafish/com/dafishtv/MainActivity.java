@@ -511,7 +511,7 @@ public class MainActivity extends Activity {
         @Override
         public void onCompletion(IMediaPlayer mp) {
 //            Toast.makeText(MainActivity.this, "节目已播放完毕", Toast.LENGTH_LONG).show();
-            mDrawerLayout.openDrawer(GravityCompat.START);
+//            mDrawerLayout.openDrawer(GravityCompat.START);
             mLoading.setVisibility(View.GONE);
 //            videoPlayEnd();
         }
