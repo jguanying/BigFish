@@ -12,6 +12,10 @@ public class ExtraInfo {
 
     private String customer;
 
+    private String logo;
+
+    private String background;
+
     public String getCustomer() {
         return customer;
     }
@@ -26,5 +30,21 @@ public class ExtraInfo {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
+    }
+
+    public String getBackground() {
+        return background;
+    }
+
+    public void setBackground(String background) {
+        this.background = background;
     }
 }

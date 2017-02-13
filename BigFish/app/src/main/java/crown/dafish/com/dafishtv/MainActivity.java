@@ -37,6 +37,15 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.ksyun.media.player.IMediaPlayer;
 import com.ksyun.media.player.KSYMediaPlayer;
+import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.cache.memory.impl.LRULimitedMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
+import com.nostra13.universalimageloader.utils.StorageUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,6 +63,7 @@ import crown.dafish.com.model.ProgramModel;
 import crown.dafish.com.model.TvModel;
 import crown.dafish.com.utils.Constants;
 import crown.dafish.com.utils.ConvertUtil;
+import crown.dafish.com.utils.LocalCacheUtil;
 import crown.dafish.com.utils.Util;
 import crown.dafish.com.view.ScrollViewEx;
 import crown.dafish.com.view.TimeBar;
@@ -101,6 +111,9 @@ public class MainActivity extends Activity {
     private static final int MSG_HIDE_PANEL = 0;
 
     private static final int MSG_REFRESH_PROGRAM = 1;
+
+    private ImageView logoImageView;
+    private ImageView backgroundImageView;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -180,6 +193,8 @@ public class MainActivity extends Activity {
         initPlayer();
 //        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 //        navigationView.setNavigationItemSelectedListener(this);
+        // 初始化图片加载控件
+        initImageLoaderConfiguration();
     }
 
     private void init() {
@@ -322,6 +337,8 @@ public class MainActivity extends Activity {
             }
         });
 
+        logoImageView = (ImageView)findViewById(R.id.logo);
+
     }
 
     private void initPlayer() {
@@ -367,6 +384,9 @@ public class MainActivity extends Activity {
             Log.e(TAG, "Hardware !!!!!!!!");
             mKSYMediaPlayer.setDecodeMode(KSYMediaPlayer.KSYDecodeMode.KSY_DECODE_MODE_AUTO);
         }
+
+        backgroundImageView = (ImageView)findViewById(R.id.background_imageview);
+
     }
 
     private void getChannel() {
@@ -382,6 +402,9 @@ public class MainActivity extends Activity {
                     Log.d(TAG,"channel: " + response);
 //                    response = "{ \"programs\" : [ { \"logo\" : \"bj.png\", \"title\" : \"北京\", \"source\" : \"http://103.198.18.22:8088/live/bjtv.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"beijingstv\" }, { \"logo\" : \"gd.png\", \"title\" : \"广东\", \"source\" : \"http://103.198.18.22:8088/live/ngdtvsd.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"gd\" }, { \"logo\" : \"df.png\", \"title\" : \"东方\", \"source\" : \"http://103.198.18.22:8088/live/ndftvhd.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"df\" }, { \"logo\" : \"sr.png\", \"title\" : \"卡酷卡通\", \"source\" : \"http://103.198.18.22:8088/live/kkdh.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"kakukaton\" }, { \"logo\" : \"dsj.png\", \"title\" : \"古装剧场\", \"source\" : \"http://103.198.18.22:8088/live/gtjc.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"guzhuangjc\" }, { \"logo\" : \"zy.png\", \"title\" : \"赛事\", \"source\" : \"http://103.198.18.22:8088/live/wpzy.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"saishijx\" }, { \"logo\" : \"xw.png\", \"title\" : \"cctv-2\", \"source\" : \"http://103.198.18.22:8082/TV4020.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"cctv-2\" }, { \"logo\" : \"cj.png\", \"title\" : \"cctv-3\", \"source\" : \"http://103.198.18.22:8082/TV4013.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"cctv-3\"}, { \"logo\" : \"ms.png\", \"title\" : \"描述\", \"source\" : \"http://103.198.18.22:8082/TV3005.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"saishijx\"} ], \"info\" : { \"version\" : 1, \"customer\" : \"Crown\" } }";
                     mChannel = gson.fromJson(response, Channel.class);
+                    ImageLoader imageLoader = ImageLoader.getInstance();
+                    imageLoader.displayImage(Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getLogo(), logoImageView);
+                    imageLoader.displayImage(Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getBackground(), backgroundImageView);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 }
@@ -919,4 +942,33 @@ public class MainActivity extends Activity {
             }
         });
     }
+
+    /**
+     * 初始化加载图片控件
+     */
+    private void initImageLoaderConfiguration() {
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration
+                .Builder(this)
+                .memoryCacheExtraOptions(480, 800) // max width, max height，即保存的每个缓存文件的最大长宽
+                .threadPoolSize(3)//线程池内加载的数量
+                .threadPriority(Thread.NORM_PRIORITY - 2)
+                .tasksProcessingOrder(QueueProcessingType.FIFO) // default
+                .denyCacheImageMultipleSizesInMemory()
+                .memoryCache(new LRULimitedMemoryCache(2 * 1024 * 1024)) // You can pass your own memory cache implementation/你可以通过自己的内存缓存实现
+                .memoryCacheSize(2 * 1024 * 1024)
+                .memoryCacheSizePercentage(13) // default
+                .diskCacheSize(50 * 1024 * 1024)
+                .diskCacheFileNameGenerator(new Md5FileNameGenerator())//将保存的时候的URI名称用MD5 加密
+                .tasksProcessingOrder(QueueProcessingType.LIFO)
+                .diskCacheFileCount(100) //缓存的文件数量
+                .diskCache(new UnlimitedDiskCache(StorageUtils.getOwnCacheDirectory(this, LocalCacheUtil.getCacheImgPath(this)),
+                        null, new Md5FileNameGenerator()))//自定义缓存路径
+                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
+                .imageDownloader(new BaseImageDownloader(this, 5 * 1000, 30 * 1000)) // connectTimeout (5 s), readTimeout (30 s)超时时间
+                .writeDebugLogs() // Remove for release app
+                .build();//开始构建
+
+        ImageLoader.getInstance().init(config);//全局初始化此配置
+    }
+
 }

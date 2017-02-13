@@ -21,7 +21,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile fileTree(include: '*/so', dir: 'libs/armeabi-v7a')
     compile fileTree(include: '*/so', dir: 'libs/arm64-v8a')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -33,4 +33,6 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile project(':playerlib')
+    compile files('/Users/jianggy/Documents/work/大鱼/github/BigFish/BigFish/libs/universal-image-loader-1.9.5.jar')
+    compile files('/Users/jianggy/Documents/work/大鱼/github/BigFish/BigFish/libs/commons-lang-2.6.jar')
 }
