@@ -773,7 +773,7 @@ public class MainActivity extends Activity {
 
     private void dealTouchEvent() {
         if (mPlayerPanel.getVisibility() != View.VISIBLE) {
-            mPlayerPanel.setVisibility(View.VISIBLE);
+            mPlayerPanel.setVisibility(View.GONE);
             hidePanel();
         } else {
             mHandler.removeMessages(MSG_HIDE_PANEL);
