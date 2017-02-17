@@ -33,8 +33,6 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile project(':playerlib')
-    compile files('/Users/jianggy/Documents/work/大鱼/github/BigFish/BigFish/libs/universal-image-loader-1.9.5.jar')
-    compile files('/Users/jianggy/Documents/work/大鱼/github/BigFish/BigFish/libs/commons-lang-2.6.jar')
-    compile files('/Users/jianggy/Documents/jianggy/work/luand/Hotel-Player/git_hub/BigFish/BigFish/libs/commons-lang-2.6.jar')
-    compile files('/Users/jianggy/Documents/jianggy/work/luand/Hotel-Player/git_hub/BigFish/BigFish/libs/universal-image-loader-1.9.5.jar')
+    compile files('libs/commons-lang-2.6.jar')
+    compile files('libs/universal-image-loader-1.9.5.jar')
 }
