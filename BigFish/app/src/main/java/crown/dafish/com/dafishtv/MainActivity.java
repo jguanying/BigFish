@@ -1,6 +1,8 @@
 package crown.dafish.com.dafishtv;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -51,10 +54,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import crown.dafish.com.model.Channel;
 import crown.dafish.com.model.ProgramData;
@@ -106,6 +112,10 @@ public class MainActivity extends Activity {
 
     private TextView mPlayerPosition;
 
+    private LinearLayout voiceLayout;
+
+    private Button voiceButton;
+
     private int mVideoProgress = 0;
 
     private static final int MSG_HIDE_PANEL = 0;
@@ -114,6 +124,10 @@ public class MainActivity extends Activity {
 
     private ImageView logoImageView;
     private ImageView backgroundImageView;
+
+    private int mSteam = AudioManager.STREAM_MUSIC;
+
+    private AudioManager mAudioManager;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -185,6 +199,13 @@ public class MainActivity extends Activity {
     private boolean isListScroll = false;
 
     private boolean isProgramScroll = false;
+
+
+    //是否第一次点击
+    private int clickCount = 0;
+    Timer timer = new Timer();
+    int m_firstpos ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -198,6 +219,10 @@ public class MainActivity extends Activity {
     }
 
     private void init() {
+
+        //音量控制,初始化定义
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
         mLayoutInflater = LayoutInflater.from(this);
         mMask = findViewById(R.id.mask);
         mTimeBar = (TimeBar) findViewById(R.id.timeBar);
@@ -254,6 +279,8 @@ public class MainActivity extends Activity {
         findViewById(R.id.program_list).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //第一次点击的时候有bug，右边没刷新，所以单独做一个逻辑
+                clickCount ++ ;
                 tonggleProgramPanel();
             }
         });
@@ -281,7 +308,9 @@ public class MainActivity extends Activity {
                             + getResources().getDimensionPixelOffset(R.dimen.divider_height));
                     int top = view.getChildAt(0).getTop();
                     position = position - top;
+                        Log.d(TAG, "mScrollView.getChildCount():" + mScrollView.getChildCount());
                     mScrollView.scrollTo(0, position);
+                    m_firstpos = position;
                 }
             }
         });
@@ -387,8 +416,22 @@ public class MainActivity extends Activity {
 
         backgroundImageView = (ImageView)findViewById(R.id.background_imageview);
 
-    }
+        voiceLayout = (LinearLayout)findViewById(R.id.voice_layout);
+        voiceLayout.setVisibility(View.GONE);
+        voiceButton = (Button)findViewById(R.id.voice_button);
 
+        voiceButton.setOnClickListener(new myOnClick());
+
+    }
+    private class myOnClick implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            mAudioManager.adjustStreamVolume(mSteam, AudioManager.ADJUST_RAISE,
+                    AudioManager.FX_FOCUS_NAVIGATION_UP);
+
+        }
+
+    }
     private void getChannel() {
         if (mRequestQueue == null) {
             mRequestQueue = Volley.newRequestQueue(this);
@@ -557,6 +600,7 @@ public class MainActivity extends Activity {
             mKSYMediaPlayer.start();
             mLoading.setVisibility(View.GONE);
             mVideoSurfaceView.setVisibility(View.VISIBLE);
+            voiceLayout.setVisibility(View.VISIBLE);
 //            Toast.makeText(MainActivity.this, "开始播放节目", Toast.LENGTH_LONG).show();
             //set progress
             setVideoProgress(0);
@@ -748,6 +792,7 @@ public class MainActivity extends Activity {
         videoPlayEnd();
         mHandler.removeCallbacksAndMessages(null);
         mHandler = null;
+        timer.cancel();
     }
 
     private View.OnClickListener mStartBtnListener = new View.OnClickListener() {
@@ -785,7 +830,7 @@ public class MainActivity extends Activity {
 
         if (mProgramData.containsKey(id)) {
             ProgramData data = mProgramData.get(id);
-            List<ProgramModel> list = data.getPrograms();
+            final List<ProgramModel> list = data.getPrograms();
 //            int resId = 0;
 //            switch (id) {
 //                case Constants.TV_DONGFANGSTV:
@@ -837,6 +882,18 @@ public class MainActivity extends Activity {
                         break;
                     }
                 }
+
+                container.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        Log.d("jianggy", list.get(0).getProgramName());
+
+                        Intent intent = new Intent(MainActivity.this, ProgramListActivity.class);
+                        intent.putExtra("program_list", (Serializable)list);
+                        startActivity(intent);
+                        return true;
+                    }
+                });
             }
 
         }
@@ -860,7 +917,12 @@ public class MainActivity extends Activity {
         }
         return  duration;
     }
-
+    private class Task extends TimerTask {
+        @Override
+        public void run() {
+            mScrollView.scrollTo(0, m_firstpos);
+        }
+    }
     private void tonggleProgramPanel() {
         if (mProgramLayoutPanel.getVisibility() == View.GONE) {
             mProgramLayoutPanel.setVisibility(View.VISIBLE);
@@ -868,6 +930,11 @@ public class MainActivity extends Activity {
             computeMaskPosition();
             mMask.setVisibility(View.VISIBLE);
             mClose.setVisibility(View.VISIBLE);
+            if(clickCount == 1) {
+                Task task = new Task();
+                timer.schedule(task, 300);
+            }
+//            mScrollView.scrollTo(0, m_firstpos);
         } else {
             mProgramLayoutPanel.setVisibility(View.GONE);
             mMask.setVisibility(View.GONE);

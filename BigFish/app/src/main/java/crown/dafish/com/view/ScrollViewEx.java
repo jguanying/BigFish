@@ -38,4 +38,8 @@ public class ScrollViewEx extends ScrollView {
         void onScrollChange(int l, int t, int oldl, int oldt);
     }
 
+    @Override
+    public void fling(int velocityY) {
+//        super.fling(velocityY/100000);
+    }
 }

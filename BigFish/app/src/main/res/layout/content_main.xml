@@ -13,7 +13,6 @@
         android:id="@+id/background_imageview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/background"
         android:scaleType="fitXY">
 
     </ImageView>
@@ -24,6 +23,21 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true"/>
 
+    <LinearLayout
+        android:id="@+id/voice_layout"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="#00000000"
+        android:visibility="gone"
+        android:layout_alignParentRight="true">
+    <Button
+        android:id="@+id/voice_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:background="@drawable/voice"
+        />
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/player_panel"
         android:layout_width="match_parent"

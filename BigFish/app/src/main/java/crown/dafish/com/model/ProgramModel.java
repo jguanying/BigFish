@@ -1,5 +1,7 @@
 package crown.dafish.com.model;
 
+import java.io.Serializable;
+
 /**********************************************************************
  * 节目单
  * @author sundi
@@ -7,7 +9,7 @@ package crown.dafish.com.model;
  * @包名 crown.dafish.com.model
  * @创建日期 16/12/27
  ***********************************************************************/
-public class ProgramModel {
+public class ProgramModel implements Serializable {
     /**
      * 节目ID
      */
