@@ -15,6 +15,16 @@ public class ProgramInfo {
 
     private String source;
 
+    public String getBackupSource() {
+        return backupSource;
+    }
+
+    public void setBackupSource(String backupSource) {
+        this.backupSource = backupSource;
+    }
+
+    private String backupSource;
+
     private String epg;
 
     private String uuid;
@@ -58,4 +68,6 @@ public class ProgramInfo {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
+
+
 }

@@ -26,6 +26,16 @@ public class TvModel {
      */
     private String mId;
 
+    private String backupSource;
+
+    public String getBackupSource() {
+        return backupSource;
+    }
+
+    public void setBackupSource(String backupSource) {
+        this.backupSource = backupSource;
+    }
+
     public String getId() {
         return mId;
     }

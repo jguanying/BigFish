@@ -11,7 +11,7 @@ public class Constants {
     /**
      * 节目信息地址
      */
-    public static final String PROGRAM_INFO_BASE_URL = "http://crown.da-fish.com:8888/service/channel?uuid=54321";
+    public static final String PROGRAM_INFO_BASE_URL = "http://crown.da-fish.com:8888/service/channel?uuid=111118";
 
     /**
      * 节目单基地址
@@ -23,6 +23,10 @@ public class Constants {
      * 频道ICON地址
      */
     public static final String PROGRAM_ICON_URL = "http://crown.da-fish.com:8888/service/images?logo=";
+
+    public static final String PAD_LOCAL_URL = "/storage/emulated/0/Movies/";
+
+
     /**
      * 电视频道地址
      */

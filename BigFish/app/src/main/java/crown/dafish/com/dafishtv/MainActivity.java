@@ -30,6 +30,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -69,10 +70,12 @@ import crown.dafish.com.model.ProgramModel;
 import crown.dafish.com.model.TvModel;
 import crown.dafish.com.utils.Constants;
 import crown.dafish.com.utils.ConvertUtil;
+import crown.dafish.com.utils.DensityUtil;
 import crown.dafish.com.utils.LocalCacheUtil;
 import crown.dafish.com.utils.Util;
 import crown.dafish.com.view.ScrollViewEx;
 import crown.dafish.com.view.TimeBar;
+
 
 public class MainActivity extends Activity {
 
@@ -128,6 +131,21 @@ public class MainActivity extends Activity {
     private int mSteam = AudioManager.STREAM_MUSIC;
 
     private AudioManager mAudioManager;
+    private int curPosition = 0;
+
+    private boolean isChanged = false;
+
+    private float mLastMotionX;
+    private float mLastMotionY;
+    private int startX;
+    private int startY;
+    private int threshold;
+    private boolean isClick = true;
+    private float width;
+    private float height;
+    // 声音调节Toast
+    private VolumnController volumnController;
+
 
     private Handler mHandler = new Handler() {
         @Override
@@ -219,6 +237,11 @@ public class MainActivity extends Activity {
     }
 
     private void init() {
+
+        width = DensityUtil.getWidthInPx(this);
+        height = DensityUtil.getHeightInPx(this);
+        threshold = DensityUtil.dip2px(this, 18);
+        volumnController = new VolumnController(this);
 
         //音量控制,初始化定义
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -320,14 +343,18 @@ public class MainActivity extends Activity {
 //            tvModel.setId(mProgramId[i]);
 //            tvModel.setUrl(Constants.TV_BASE_URL + mTvUrl[i]);
 //            mTvModels.add(tvModel);
-//        }
+//        }i
 
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mDrawerLayout.closeDrawer(GravityCompat.START);
+                videoPlayEnd();
+                initPlayer();
                 playTv(mTvModels.get(position).getUrl());
+                curPosition = position;
+                isChanged = false;
             }
         });
         mListView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -372,6 +399,7 @@ public class MainActivity extends Activity {
 
     private void initPlayer() {
         mVideoSurfaceView = (SurfaceView) findViewById(R.id.player_surface);
+        mVideoSurfaceView.setOnTouchListener(mTouchListener);
         mVideoSurfaceView.setVisibility(View.GONE);
         mSurfaceHolder = mVideoSurfaceView.getHolder();
         mSurfaceHolder.addCallback(mSurfaceCallback);
@@ -407,6 +435,7 @@ public class MainActivity extends Activity {
         mKSYMediaPlayer.setScreenOnWhilePlaying(true);
         mKSYMediaPlayer.setBufferTimeMax(300.0f);
         mKSYMediaPlayer.setTimeout(5, 300);
+        mKSYMediaPlayer.setLooping(true);
 
         if (mUseHwCodec) {
             //硬解264&265
@@ -476,7 +505,8 @@ public class MainActivity extends Activity {
                 }
                 TvModel tvModel = new TvModel();
                 tvModel.setId(programInfos.get(i).getUuid());
-                tvModel.setUrl(programInfos.get(i).getSource());
+                tvModel.setUrl(Util.getInnerSDCardPath() + "/" + programInfos.get(i).getSource());
+                tvModel.setBackupSource(programInfos.get(i).getBackupSource());
                 tvModel.setTvName(programInfos.get(i).getTitle());
                 tvModel.setTvIconPath(Constants.PROGRAM_ICON_URL + programInfos.get(i).getLogo());
                 mTvModels.add(tvModel);
@@ -613,12 +643,48 @@ public class MainActivity extends Activity {
     public IMediaPlayer.OnInfoListener mOnInfoListener = new IMediaPlayer.OnInfoListener() {
         @Override
         public boolean onInfo(IMediaPlayer iMediaPlayer, int i, int i1) {
+
+            String error = "";
+
             switch (i) {
                 case KSYMediaPlayer.MEDIA_INFO_SUGGEST_RELOAD:
                     // Player find a new stream(video or audio), and we could reload the video.
                     if (mKSYMediaPlayer != null)
                         mKSYMediaPlayer.reload(mCurrentUrl, false, KSYMediaPlayer.KSYReloadMode.KSY_RELOAD_MODE_ACCURATE);
                     mLoading.setVisibility(View.GONE);
+                    break;
+
+                case KSYMediaPlayer.MEDIA_ERROR_UNKNOWN:
+                case KSYMediaPlayer.MEDIA_ERROR_SERVER_DIED:
+                case KSYMediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
+                case KSYMediaPlayer.MEDIA_ERROR_IO:
+                case KSYMediaPlayer.MEDIA_ERROR_MALFORMED:
+                case KSYMediaPlayer.MEDIA_ERROR_UNSUPPORTED:
+                case KSYMediaPlayer.MEDIA_ERROR_TIMED_OUT:
+                case KSYMediaPlayer.MEDIA_ERROR_UNSUPPORT_PROTOCOL:
+                case KSYMediaPlayer.MEDIA_ERROR_DNS_PARSE_FAILED:
+                case KSYMediaPlayer.MEDIA_ERROR_CREATE_SOCKET_FAILED:
+                case KSYMediaPlayer.MEDIA_ERROR_CONNECT_SERVER_FAILED:
+                case KSYMediaPlayer.MEDIA_ERROR_BAD_REQUEST:
+                case KSYMediaPlayer.MEDIA_ERROR_UNAUTHORIZED_CLIENT:
+                case KSYMediaPlayer.MEDIA_ERROR_ACCESSS_FORBIDDEN:
+                case KSYMediaPlayer.MEDIA_ERROR_TARGET_NOT_FOUND:
+                case KSYMediaPlayer.MEDIA_ERROR_OTHER_ERROR_CODE:
+                case KSYMediaPlayer.MEDIA_ERROR_SERVER_EXCEPTION:
+                case KSYMediaPlayer.MEDIA_ERROR_INVALID_DATA:
+                case KSYMediaPlayer.MEDIA_ERROR_UNSUPPORT_VIDEO_CODEC:
+                case KSYMediaPlayer.MEDIA_ERROR_UNSUPPORT_AUDIO_CODEC:
+                case KSYMediaPlayer.MEDIA_ERROR_VIDEO_DECODE_FAILED:
+                case KSYMediaPlayer.MEDIA_ERROR_AUDIO_DECODE_FAILED:
+                case KSYMediaPlayer.MEDIA_ERROR_3XX_OVERFLOW:
+                    if (!isChanged) {
+                        isChanged = true;
+                        error = "错误码：" + i + "! 切换到备用播放源！";
+                        Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
+                        playTv(mTvModels.get(curPosition).getBackupSource());
+                    }
+
                     break;
             }
             return false;
@@ -637,7 +703,7 @@ public class MainActivity extends Activity {
                     mVideoHeight = mp.getVideoHeight();
 
                     if (mKSYMediaPlayer != null)
-                        mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+                        mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
                 }
             }
         }
@@ -667,7 +733,7 @@ public class MainActivity extends Activity {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             if (mKSYMediaPlayer != null && mKSYMediaPlayer.isPlaying())
-                mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+                mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
         }
 
         @Override
@@ -864,7 +930,7 @@ public class MainActivity extends Activity {
                     programDuration.setText(model.getStartTime().substring(0,5) + "-" + model.getEndTime().substring(0,5));
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
 //                    layoutParams.height = mListHeight / mTvModels.size();
-                    layoutParams.height = Util.dp2px(this,70);
+                    layoutParams.height = Util.dp2px(this, 85);
                     int duration = getProgramDuration(model);
 
                     if (i == 0) {
@@ -1036,6 +1102,141 @@ public class MainActivity extends Activity {
                 .build();//开始构建
 
         ImageLoader.getInstance().init(config);//全局初始化此配置
+    }
+
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            final float x = event.getX();
+            final float y = event.getY();
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mLastMotionX = x;
+                    mLastMotionY = y;
+                    startX = (int) x;
+                    startY = (int) y;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    float deltaX = x - mLastMotionX;
+                    float deltaY = y - mLastMotionY;
+                    float absDeltaX = Math.abs(deltaX);
+                    float absDeltaY = Math.abs(deltaY);
+                    // 声音调节标识
+                    boolean isAdjustAudio = false;
+                    if (absDeltaX > threshold && absDeltaY > threshold) {
+                        if (absDeltaX < absDeltaY) {
+                            isAdjustAudio = true;
+                        } else {
+                            isAdjustAudio = false;
+                        }
+                    } else if (absDeltaX < threshold && absDeltaY > threshold) {
+                        isAdjustAudio = true;
+                    } else if (absDeltaX > threshold && absDeltaY < threshold) {
+                        isAdjustAudio = false;
+                    } else {
+                        return true;
+                    }
+                    if (isAdjustAudio) {
+                        if (x < width / 2) {
+                            if (deltaY > 0) {
+                                lightDown(absDeltaY);
+                            } else if (deltaY < 0) {
+                                lightUp(absDeltaY);
+                            }
+                        } else {
+                            if (deltaY > 0) {
+                                volumeDown(absDeltaY);
+                            } else if (deltaY < 0) {
+                                volumeUp(absDeltaY);
+                            }
+                        }
+
+                    } else {
+                        if (deltaX > 0) {
+                            forward(absDeltaX);
+                        } else if (deltaX < 0) {
+                            backward(absDeltaX);
+                        }
+                    }
+                    mLastMotionX = x;
+                    mLastMotionY = y;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (Math.abs(x - startX) > threshold
+                            || Math.abs(y - startY) > threshold) {
+                        isClick = false;
+                    }
+                    mLastMotionX = 0;
+                    mLastMotionY = 0;
+                    startX = (int) 0;
+                    if (isClick) {
+                        showOrHide();
+                    }
+                    isClick = true;
+                    break;
+
+                default:
+                    break;
+            }
+            return true;
+        }
+
+    };
+
+    private void volumeDown(float delatY) {
+        int max = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int current = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        int down = (int) (delatY / height * max * 3);
+        int volume = Math.max(current - down, 0);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+        int transformatVolume = volume * 100 / max;
+        volumnController.show(transformatVolume);
+    }
+
+    private void volumeUp(float delatY) {
+        int max = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int current = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        int up = (int) ((delatY / height) * max * 3);
+        int volume = Math.min(current + up, max);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+        int transformatVolume = volume * 100 / max;
+        volumnController.show(transformatVolume);
+    }
+
+    private void lightDown(float delatY) {
+//        int down = (int) (delatY / height * 255 * 3);
+//        int transformatLight = LightnessController.getLightness(this) - down;
+//        LightnessController.setLightness(this, transformatLight);
+    }
+
+    private void lightUp(float delatY) {
+//        int up = (int) (delatY / height * 255 * 3);
+//        int transformatLight = LightnessController.getLightness(this) + up;
+//        LightnessController.setLight(this, transformatLight);
+    }
+
+    private void showOrHide() {
+
+    }
+
+    private void backward(float delataX) {
+//        int current = mVideo.getCurrentPosition();
+//        int backwardTime = (int) (delataX / width * mVideo.getDuration());
+//        int currentTime = current - backwardTime;
+//        mVideo.seekTo(currentTime);
+//        mSeekBar.setProgress(currentTime * 100 / mVideo.getDuration());
+//        mPlayTime.setText(formatTime(currentTime));
+    }
+
+    private void forward(float delataX) {
+//        int current = mVideo.getCurrentPosition();
+//        int forwardTime = (int) (delataX / width * mVideo.getDuration());
+//        int currentTime = current + forwardTime;
+//        mVideo.seekTo(currentTime);
+//        mSeekBar.setProgress(currentTime * 100 / mVideo.getDuration());
+//        mPlayTime.setText(formatTime(currentTime));
     }
 
 }

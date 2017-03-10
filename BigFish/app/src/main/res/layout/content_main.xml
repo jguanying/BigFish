@@ -36,6 +36,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:background="@drawable/voice"
+        android:visibility="gone"
         />
     </LinearLayout>
     <LinearLayout
@@ -82,7 +83,7 @@
 
     <ImageView
         android:id="@+id/slide_btn"
-        android:layout_width="30dp"
+        android:layout_width="100dp"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"/>
     <ProgressBar

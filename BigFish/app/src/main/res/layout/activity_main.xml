@@ -53,14 +53,20 @@
                 android:dividerHeight="@dimen/divider_height"
                 android:listSelector="#232323"
                 android:scrollbars="none"/>
-
-            <ImageView
+            <LinearLayout
                 android:id="@+id/program_list"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:padding="10dp"
-                android:src="@drawable/foot"/>
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textColor="#ffffff"
+                    android:textSize="18sp"
+                    android:text="节目导视"/>
+            </LinearLayout>
         </LinearLayout>
 
     </android.support.v4.widget.DrawerLayout>
