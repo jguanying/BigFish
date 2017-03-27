@@ -366,6 +366,8 @@ public class MainActivity2 extends Activity {
                 playTv(mTvModels.get(position).getUrl());
                 curPosition = position;
                 isChanged = false;
+                mPause = false;
+                mPlayerStartBtn.setBackgroundResource(R.drawable.pause);
             }
         });
         mListView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -506,6 +508,7 @@ public class MainActivity2 extends Activity {
                     imageLoader.displayImage(Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getBackground(), backgroundImageView);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
+                    Toast.makeText(MainActivity2.this, "该设备未经过认证，请联系大鱼公司进行认证!", Toast.LENGTH_LONG).show();
                 }
                 getProgramList();
 
