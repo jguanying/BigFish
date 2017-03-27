@@ -7,7 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="crown.dafish.com.dafishtv.MainActivity">
+    tools:context="crown.dafish.com.dafishtv.MainActivity"
+    android:background="#000000">
 
     <ImageView
         android:id="@+id/background_imageview"
@@ -17,11 +18,14 @@
 
     </ImageView>
 
-    <SurfaceView
+    <com.ksyun.media.player.KSYTextureView
         android:id="@+id/player_surface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        tools:targetApi="ice_cream_sandwich"/>
+
     <LinearLayout
         android:id="@+id/voice_layout"
         android:layout_width="50dp"
@@ -29,14 +33,14 @@
         android:background="#00000000"
         android:visibility="gone"
         android:layout_alignParentRight="true">
-        <Button
-            android:id="@+id/voice_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:background="@drawable/voice"
-            android:visibility="gone"
-            />
+    <Button
+        android:id="@+id/voice_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:background="@drawable/voice"
+        android:visibility="gone"
+        />
     </LinearLayout>
     <LinearLayout
         android:id="@+id/player_panel"
@@ -48,8 +52,8 @@
 
         <ImageView
             android:id="@+id/player_start"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:background="@drawable/pause"/>
 
@@ -57,7 +61,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_gravity="center_vertical"
-            android:visibility="gone">
+            android:layout_marginRight="10dp">
 
 
             <TextView
@@ -79,9 +83,10 @@
         </RelativeLayout>
 
     </LinearLayout>
+
     <ImageView
         android:id="@+id/slide_btn"
-        android:layout_width="150dp"
+        android:layout_width="100dp"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"/>
     <ProgressBar
@@ -91,6 +96,4 @@
         android:layout_centerInParent="true"
         android:visibility="gone"
         android:id="@+id/progressBar"/>
-
-
 </RelativeLayout>

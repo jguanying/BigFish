@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    buildToolsVersion '25.0.0'
     defaultConfig {
         applicationId "crown.dafish.com.dafishtv"
         minSdkVersion 19
@@ -32,6 +32,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.5'
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.tencent.bugly:crashreport:2.5.0'
     compile project(':playerlib')
     compile files('libs/commons-lang-2.6.jar')
     compile files('libs/universal-image-loader-1.9.5.jar')

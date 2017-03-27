@@ -7,7 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="crown.dafish.com.dafishtv.MainActivity">
+    tools:context="crown.dafish.com.dafishtv.MainActivity"
+    android:background="#000000">
 
     <ImageView
         android:id="@+id/background_imageview"
@@ -17,11 +18,13 @@
 
     </ImageView>
 
-    <SurfaceView
+    <com.ksyun.media.player.KSYTextureView
         android:id="@+id/player_surface"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        tools:targetApi="ice_cream_sandwich"/>
     <LinearLayout
         android:id="@+id/voice_layout"
         android:layout_width="50dp"
@@ -57,7 +60,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_gravity="center_vertical"
-            android:visibility="gone">
+            android:layout_marginRight="10dp">
 
 
             <TextView
@@ -91,6 +94,4 @@
         android:layout_centerInParent="true"
         android:visibility="gone"
         android:id="@+id/progressBar"/>
-
-
 </RelativeLayout>

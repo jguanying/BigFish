@@ -14,7 +14,7 @@
         tools:openDrawer="start">
 
         <include
-            layout="@layout/content_main"
+            layout="@layout/content_main2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
@@ -101,7 +101,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
-                        android:background="#55239923"
+                        android:background="#6000375F"
                         android:orientation="vertical"
                         android:visibility="gone"/>
                 </FrameLayout>

@@ -3,8 +3,10 @@ package crown.dafish.com.dafishtv;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class ProgramListActivity extends Activity {
 
     private ArrayList<ProgramModel> mList = new ArrayList<>();
     private ListView mListView;
+    private ImageButton mImageButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,5 +36,13 @@ public class ProgramListActivity extends Activity {
         mListView = (ListView) findViewById(R.id.program_list);
         ProgramListAdapter adapter = new ProgramListAdapter(getApplicationContext(), mList);
         mListView.setAdapter(adapter);
+
+        mImageButton = (ImageButton) findViewById(R.id.program_close_button);
+        mImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 }

@@ -11,7 +11,7 @@ public class Constants {
     /**
      * 节目信息地址
      */
-    public static final String PROGRAM_INFO_BASE_URL = "http://crown.da-fish.com:8888/service/channel?uuid=111118";
+    public static final String PROGRAM_INFO_BASE_URL = "http://crown.da-fish.com:8888/service/channel?macaddress=";
 
     /**
      * 节目单基地址

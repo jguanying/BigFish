@@ -17,8 +17,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -45,6 +43,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.ksyun.media.player.IMediaPlayer;
 import com.ksyun.media.player.KSYMediaPlayer;
+import com.ksyun.media.player.KSYTextureView;
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.LRULimitedMemoryCache;
@@ -82,7 +81,7 @@ import crown.dafish.com.view.ScrollViewEx;
 import crown.dafish.com.view.TimeBar;
 
 
-public class MainActivity extends Activity {
+public class MainActivity2 extends Activity {
 
     private static final String TAG = "DaFishTv";
 
@@ -96,11 +95,10 @@ public class MainActivity extends Activity {
 
     private ArrayList<TvModel> mTvModels = new ArrayList<>();
 
-    private SurfaceView mVideoSurfaceView = null;
+    private KSYTextureView mVideoSurfaceView = null;
 
-    private SurfaceHolder mSurfaceHolder = null;
-
-    private KSYMediaPlayer mKSYMediaPlayer;
+//    private SurfaceHolder mSurfaceHolder = null;
+//    private KSYMediaPlayer mKSYMediaPlayer;
 
     private int mVideoWidth = 0;
 
@@ -364,8 +362,7 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mDrawerLayout.closeDrawer(GravityCompat.START);
-                videoPlayEnd();
-                initPlayer();
+                resetPlayer();
                 playTv(mTvModels.get(position).getUrl());
                 curPosition = position;
                 isChanged = false;
@@ -409,21 +406,21 @@ public class MainActivity extends Activity {
 
         logoImageView = (ImageView)findViewById(R.id.logo);
 
+        backgroundImageView = (ImageView)findViewById(R.id.background_imageview);
+
     }
 
     private void initPlayer() {
 
-        mVideoSurfaceView = (SurfaceView) findViewById(R.id.player_surface);
+        mVideoSurfaceView = (KSYTextureView) findViewById(R.id.player_surface);
         mVideoSurfaceView.setOnTouchListener(mTouchListener);
         mVideoSurfaceView.setVisibility(View.GONE);
-        mSurfaceHolder = mVideoSurfaceView.getHolder();
-        mSurfaceHolder.addCallback(mSurfaceCallback);
+//        mSurfaceHolder = mVideoSurfaceView.getHolder();
+//        mSurfaceHolder.addCallback(mSurfaceCallback);
         mVideoSurfaceView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mKSYMediaPlayer != null) {
-                    dealTouchEvent();
-                }
+                dealTouchEvent();
             }
         });
         mVideoSurfaceView.setKeepScreenOn(true);
@@ -439,26 +436,23 @@ public class MainActivity extends Activity {
         mPlayerSeekbar.setOnSeekBarChangeListener(mSeekBarListener);
         mPlayerSeekbar.setEnabled(true);
 
-        mKSYMediaPlayer = new KSYMediaPlayer.Builder(this.getApplicationContext()).build();
-        mKSYMediaPlayer.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
-        mKSYMediaPlayer.setOnCompletionListener(mOnCompletionListener);
-        mKSYMediaPlayer.setOnPreparedListener(mOnPreparedListener);
-        mKSYMediaPlayer.setOnInfoListener(mOnInfoListener);
-        mKSYMediaPlayer.setOnVideoSizeChangedListener(mOnVideoSizeChangeListener);
-        mKSYMediaPlayer.setOnErrorListener(mOnErrorListener);
-//        mKSYMediaPlayer.setOnSeekCompleteListener(mOnSeekCompletedListener);
-        mKSYMediaPlayer.setScreenOnWhilePlaying(true);
-        mKSYMediaPlayer.setBufferTimeMax(300.0f);
-        mKSYMediaPlayer.setTimeout(5, 300);
-        mKSYMediaPlayer.setLooping(true);
+        mVideoSurfaceView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
+        mVideoSurfaceView.setOnCompletionListener(mOnCompletionListener);
+        mVideoSurfaceView.setOnPreparedListener(mOnPreparedListener);
+        mVideoSurfaceView.setOnInfoListener(mOnInfoListener);
+        mVideoSurfaceView.setOnVideoSizeChangedListener(mOnVideoSizeChangeListener);
+        mVideoSurfaceView.setOnErrorListener(mOnErrorListener);
+//        mVideoSurfaceView.setOnSeekCompleteListener(mOnSeekCompletedListener);
+        mVideoSurfaceView.setScreenOnWhilePlaying(true);
+        mVideoSurfaceView.setBufferTimeMax(300.0f);
+        mVideoSurfaceView.setTimeout(5, 300);
+        mVideoSurfaceView.setLooping(true);
 
-        if (mUseHwCodec) {
+        if (true) {
             //硬解264&265
             Log.e(TAG, "Hardware !!!!!!!!");
-            mKSYMediaPlayer.setDecodeMode(KSYMediaPlayer.KSYDecodeMode.KSY_DECODE_MODE_AUTO);
+            mVideoSurfaceView.setDecodeMode(KSYMediaPlayer.KSYDecodeMode.KSY_DECODE_MODE_AUTO);
         }
-
-        backgroundImageView = (ImageView)findViewById(R.id.background_imageview);
 
         voiceLayout = (LinearLayout)findViewById(R.id.voice_layout);
         voiceLayout.setVisibility(View.GONE);
@@ -467,6 +461,22 @@ public class MainActivity extends Activity {
         voiceButton.setOnClickListener(new myOnClick());
 
     }
+
+    private void resetPlayer() {
+
+//        backgroundImageView.setVisibility(View.VISIBLE);
+
+        //当前有视频正在播放，需先停止当前播放
+        mVideoSurfaceView.stop();
+        //重置播放
+        mVideoSurfaceView.reset();
+
+        mVideoSurfaceView.setBufferTimeMax(300.0f);
+        mVideoSurfaceView.setTimeout(5, 300);
+        mVideoSurfaceView.setLooping(true);
+
+    }
+
     private class myOnClick implements View.OnClickListener {
         @Override
         public void onClick(View view) {
@@ -477,6 +487,7 @@ public class MainActivity extends Activity {
 
     }
     private void getChannel() {
+
         if (mRequestQueue == null) {
             mRequestQueue = Volley.newRequestQueue(this);
         }
@@ -611,7 +622,7 @@ public class MainActivity extends Activity {
     private IMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = new IMediaPlayer.OnBufferingUpdateListener() {
         @Override
         public void onBufferingUpdate(IMediaPlayer mp, int percent) {
-            long duration = mKSYMediaPlayer.getDuration();
+            long duration = mVideoSurfaceView.getDuration();
             long progress = duration * percent / 100;
 //            mPlayerSeekbar.setSecondaryProgress((int)progress);
         }
@@ -623,7 +634,7 @@ public class MainActivity extends Activity {
     private IMediaPlayer.OnCompletionListener mOnCompletionListener = new IMediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(IMediaPlayer mp) {
-//            Toast.makeText(MainActivity.this, "节目已播放完毕", Toast.LENGTH_LONG).show();
+//            Toast.makeText(MainActivity2.this, "节目已播放完毕", Toast.LENGTH_LONG).show();
 //            mDrawerLayout.openDrawer(GravityCompat.START);
             mLoading.setVisibility(View.GONE);
 //            videoPlayEnd();
@@ -637,18 +648,20 @@ public class MainActivity extends Activity {
         @Override
         public void onPrepared(IMediaPlayer mp) {
 
-            mVideoWidth = mKSYMediaPlayer.getVideoWidth();
-            mVideoHeight = mKSYMediaPlayer.getVideoHeight();
+            backgroundImageView.setVisibility(View.GONE);
+
+            mVideoWidth = mVideoSurfaceView.getVideoWidth();
+            mVideoHeight = mVideoSurfaceView.getVideoHeight();
 
             // Set Video Scaling Mode
-            mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+            mVideoSurfaceView.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
 
             //start player
-            mKSYMediaPlayer.start();
+            mVideoSurfaceView.start();
             mLoading.setVisibility(View.GONE);
             mVideoSurfaceView.setVisibility(View.VISIBLE);
             voiceLayout.setVisibility(View.VISIBLE);
-//            Toast.makeText(MainActivity.this, "开始播放节目", Toast.LENGTH_LONG).show();
+//            Toast.makeText(MainActivity2.this, "开始播放节目", Toast.LENGTH_LONG).show();
             //set progress
             setVideoProgress(0);
         }
@@ -666,8 +679,8 @@ public class MainActivity extends Activity {
             switch (i) {
                 case KSYMediaPlayer.MEDIA_INFO_SUGGEST_RELOAD:
                     // Player find a new stream(video or audio), and we could reload the video.
-                    if (mKSYMediaPlayer != null)
-                        mKSYMediaPlayer.reload(mCurrentUrl, false, KSYMediaPlayer.KSYReloadMode.KSY_RELOAD_MODE_ACCURATE);
+                    if (mVideoSurfaceView != null)
+                        mVideoSurfaceView.reload(mCurrentUrl, false, KSYMediaPlayer.KSYReloadMode.KSY_RELOAD_MODE_ACCURATE);
                     mLoading.setVisibility(View.GONE);
                     break;
 
@@ -697,8 +710,9 @@ public class MainActivity extends Activity {
                     if (!isChanged) {
                         isChanged = true;
                         error = "错误码：" + i + "! 切换到备用播放源！";
-                        Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity2.this, error, Toast.LENGTH_LONG).show();
                         mDrawerLayout.closeDrawer(GravityCompat.START);
+                        resetPlayer();
                         playTv(mTvModels.get(curPosition).getBackupSource());
                     } else {
                         retryPlayer(i);
@@ -721,8 +735,8 @@ public class MainActivity extends Activity {
                     mVideoWidth = mp.getVideoWidth();
                     mVideoHeight = mp.getVideoHeight();
 
-                    if (mKSYMediaPlayer != null)
-                        mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+                    if (mVideoSurfaceView != null)
+                        mVideoSurfaceView.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
                 }
             }
         }
@@ -737,6 +751,7 @@ public class MainActivity extends Activity {
             switch (what) {
                 case KSYMediaPlayer.MEDIA_ERROR_UNKNOWN:
                     Log.e(TAG, "OnErrorListener, Error Unknown:" + what + ",extra:" + extra);
+                    Toast.makeText(MainActivity2.this, "播放失败！(extra:)" + extra, Toast.LENGTH_LONG).show();
                     break;
                 default:
                     Log.e(TAG, "OnErrorListener, Error:" + what + ",extra:" + extra);
@@ -748,26 +763,26 @@ public class MainActivity extends Activity {
         }
     };
 
-    private final SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            if (mKSYMediaPlayer != null && mKSYMediaPlayer.isPlaying())
-                mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
-        }
-
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            if (mKSYMediaPlayer != null)
-                mKSYMediaPlayer.setDisplay(holder);
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-            if (mKSYMediaPlayer != null) {
-                mKSYMediaPlayer.setDisplay(null);
-            }
-        }
-    };
+//    private final SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
+//        @Override
+//        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+//            if (mKSYMediaPlayer != null && mKSYMediaPlayer.isPlaying())
+//                mKSYMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+//        }
+//
+//        @Override
+//        public void surfaceCreated(SurfaceHolder holder) {
+//            if (mKSYMediaPlayer != null)
+//                mKSYMediaPlayer.setDisplay(holder);
+//        }
+//
+//        @Override
+//        public void surfaceDestroyed(SurfaceHolder holder) {
+//            if (mKSYMediaPlayer != null) {
+//                mKSYMediaPlayer.setDisplay(null);
+//            }
+//        }
+//    };
 
 
     private SeekBar.OnSeekBarChangeListener mSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
@@ -783,18 +798,18 @@ public class MainActivity extends Activity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            mKSYMediaPlayer.seekTo(mVideoProgress);
+            mVideoSurfaceView.seekTo(mVideoProgress);
             setVideoProgress(mVideoProgress);
         }
     };
 
     private int setVideoProgress(int currentProgress) {
 
-        if (mKSYMediaPlayer == null)
+        if (mVideoSurfaceView == null)
             return -1;
 
-        long time = currentProgress > 0 ? currentProgress : mKSYMediaPlayer.getCurrentPosition();
-        long length = mKSYMediaPlayer.getDuration();
+        long time = currentProgress > 0 ? currentProgress : mVideoSurfaceView.getCurrentPosition();
+        long length = mVideoSurfaceView.getDuration();
 
         mPlayerSeekbar.setMax((int) length);
         mPlayerSeekbar.setProgress((int) time);
@@ -810,24 +825,23 @@ public class MainActivity extends Activity {
 
 
     private void playTv(String url) {
-        if (mKSYMediaPlayer.isPlaying()) {
+        if (mVideoSurfaceView.isPlaying()) {
 //            mKSYMediaPlayer.stop();
-            mKSYMediaPlayer.reset();
-            mKSYMediaPlayer.setDisplay(mSurfaceHolder);
-            mKSYMediaPlayer.setScreenOnWhilePlaying(true);
-            mKSYMediaPlayer.setBufferTimeMax(30.0f);
-            mKSYMediaPlayer.setTimeout(5, 30);
+            mVideoSurfaceView.reset();
+//            mKSYMediaPlayer.setDisplay(mSurfaceHolder);
+            mVideoSurfaceView.setScreenOnWhilePlaying(true);
+            mVideoSurfaceView.setBufferTimeMax(30.0f);
+            mVideoSurfaceView.setTimeout(5, 30);
         }
         mCurrentUrl = url;
-//        mCurrentUrl = "rtmp://live.hkstv.hk.lxdns.com/live/hks";
+//        mCurrentUrl = "/storage/emulated/0/Movies/HUAWEI_Mediapad_M3.mp4";
         try {
             mLoading.setVisibility(View.VISIBLE);
-            mKSYMediaPlayer.setDataSource(mCurrentUrl);
-            mKSYMediaPlayer.prepareAsync();
+            mVideoSurfaceView.setDataSource(mCurrentUrl);
+            mVideoSurfaceView.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mKSYMediaPlayer.start();
 //        Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
     }
 
@@ -836,9 +850,9 @@ public class MainActivity extends Activity {
     }
 
     private void videoPlayEnd() {
-        if (mKSYMediaPlayer != null) {
-            mKSYMediaPlayer.release();
-            mKSYMediaPlayer = null;
+        if (mVideoSurfaceView != null) {
+            mVideoSurfaceView.release();
+            mVideoSurfaceView = null;
         }
     }
 
@@ -855,8 +869,8 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
 
-        if (mKSYMediaPlayer != null) {
-            mKSYMediaPlayer.pause();
+        if (mVideoSurfaceView != null) {
+            mVideoSurfaceView.pause();
             mPause = true;
         }
     }
@@ -865,8 +879,8 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        if (mKSYMediaPlayer != null) {
-            mKSYMediaPlayer.start();
+        if (mVideoSurfaceView != null) {
+            mVideoSurfaceView.start();
             mPause = false;
         }
     }
@@ -887,10 +901,10 @@ public class MainActivity extends Activity {
             hidePanel();
             if (mPause) {
                 mPlayerStartBtn.setBackgroundResource(R.drawable.play);
-                mKSYMediaPlayer.pause();
+                mVideoSurfaceView.pause();
             } else {
                 mPlayerStartBtn.setBackgroundResource(R.drawable.pause);
-                mKSYMediaPlayer.start();
+                mVideoSurfaceView.start();
 
             }
         }
@@ -975,7 +989,7 @@ public class MainActivity extends Activity {
                     public boolean onLongClick(View v) {
                         Log.d("jianggy", list.get(0).getProgramName());
 
-                        Intent intent = new Intent(MainActivity.this, ProgramListActivity.class);
+                        Intent intent = new Intent(MainActivity2.this, ProgramListActivity.class);
                         intent.putExtra("program_list", (Serializable)list);
                         startActivity(intent);
                         return true;
@@ -1084,17 +1098,23 @@ public class MainActivity extends Activity {
     }
 
     private void computeTimePosition(final int nowPosition) {
-        int position = (int)(nowPosition - mFiveMinuteInPixel * 2);
-        if (position < 0) {
-            position = 0;
-        }
-        final int result = position;
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mProgramLayoutPanel.scrollTo(result,0);
+
+        try {
+            int position = (int)(nowPosition - mFiveMinuteInPixel * 2);
+            if (position < 0) {
+                position = 0;
             }
-        });
+            final int result = position;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mProgramLayoutPanel.scrollTo(result,0);
+                }
+            });
+        } catch (Exception e) {
+
+        }
+
     }
 
     /**
@@ -1266,16 +1286,17 @@ public class MainActivity extends Activity {
     }
 
     protected void retryPlayer(final int i) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
         builder.setMessage("连接服务器网络异常,是否重试？");
         builder.setTitle("提示");
         builder.setPositiveButton("重试", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 isChanged = false;
-                String error = "错误码：" + i + "! 切换到主播放源！";
-                Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
+//                String error = "错误码：" + i + "! 切换到主播放源！";
+//                Toast.makeText(MainActivity2.this, error, Toast.LENGTH_LONG).show();
                 mDrawerLayout.closeDrawer(GravityCompat.START);
+                resetPlayer();
                 playTv(mTvModels.get(curPosition).getUrl());
             }
         });

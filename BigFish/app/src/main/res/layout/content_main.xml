@@ -43,20 +43,20 @@
         android:id="@+id/player_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#44ffffff"
         android:visibility="gone"
-        android:layout_alignParentBottom="true">
+        android:gravity="center"
+        android:layout_centerInParent="true">
 
         <ImageView
             android:id="@+id/player_start"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/qyvideo_start_btn"/>
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:background="@drawable/pause"/>
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_gravity="center_vertical"
             android:layout_marginRight="10dp">
 

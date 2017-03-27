@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+
 
     <ListView
         android:id="@+id/program_list"
@@ -13,4 +15,18 @@
         android:scrollbars="none"
         android:background="#ffffffff"/>
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="top|right">
+        <ImageButton
+            android:id="@+id/program_close_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:background="@drawable/close3"/>
+    </LinearLayout>
+
+
+</FrameLayout>
