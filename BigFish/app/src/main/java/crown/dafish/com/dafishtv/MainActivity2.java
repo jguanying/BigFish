@@ -108,7 +108,7 @@ public class MainActivity2 extends Activity {
 
     private boolean mUseHwCodec = false;
 
-    private boolean mPause = false;
+    private int mPause = 0;  // 0:play  1:pause  2:stop
 
     private LinearLayout mPlayerPanel;
 
@@ -150,7 +150,7 @@ public class MainActivity2 extends Activity {
     private VolumnController volumnController;
 
     private int errCount = 0;
-    private int maxErrorCount = 20;
+    private int maxErrorCount = 40;
     private boolean displayRetryDialog = false;
 
     private LinearLayout voiceControlLayout;
@@ -370,8 +370,6 @@ public class MainActivity2 extends Activity {
                 playTv(mTvModels.get(position).getUrl());
                 curPosition = position;
                 isChanged = false;
-                mPause = false;
-                mPlayerStartBtn.setBackgroundResource(R.drawable.pause);
             }
         });
         mListView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -472,6 +470,8 @@ public class MainActivity2 extends Activity {
 
 //        backgroundImageView.setVisibility(View.VISIBLE);
 
+        mPlayerPanel.setVisibility(View.GONE);
+        mPause = 0;
         errCount = 0;
         displayRetryDialog = false;
 
@@ -515,7 +515,17 @@ public class MainActivity2 extends Activity {
                     imageLoader.displayImage(Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getBackground(), backgroundImageView);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
-                    Toast.makeText(MainActivity2.this, "该设备未经过认证，请联系大鱼公司进行认证!", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(MainActivity2.this, "该设备未经过认证，请联系大鱼公司进行认证!", Toast.LENGTH_LONG).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity2.this);
+                    builder.setMessage("该设备未经过认证，请联系大鱼公司进行认证!");
+                    builder.setTitle("提示");
+                    builder.setPositiveButton("了解", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    builder.create().show();
                 }
                 getProgramList();
 
@@ -690,23 +700,11 @@ public class MainActivity2 extends Activity {
             if (i ==  KSYMediaPlayer.MEDIA_INFO_BUFFERING_START
                     || i == KSYMediaPlayer.MEDIA_INFO_BUFFERING_END) {
                 if (errCount >= maxErrorCount) {
-                    errCount = 0;
-                    if (!isChanged) {
-                        isChanged = true;
-                        error = "错误码：" + i + "! 切换到备用播放源！";
-                        Toast.makeText(MainActivity2.this, error, Toast.LENGTH_LONG).show();
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        resetPlayer();
-                        playTv(mTvModels.get(curPosition).getBackupSource());
-                    } else {
-                        if (!displayRetryDialog) {
-                            displayRetryDialog = true;
-                            retryPlayer(i);
-                        } else {
-                            mVideoSurfaceView.stop();
-                            Toast.makeText(MainActivity2.this, "播放出错！", Toast.LENGTH_LONG).show();
-                        }
-                    }
+                    Toast.makeText(MainActivity2.this, "当前网络状况不佳，播放已暂停！", Toast.LENGTH_LONG).show();
+                    mVideoSurfaceView.stop();
+                    mPause = 2;
+                    mPlayerStartBtn.setBackgroundResource(R.drawable.restart);
+                    mPlayerPanel.setVisibility(View.VISIBLE);
                 } else {
                     errCount++;
                 }
@@ -808,7 +806,7 @@ public class MainActivity2 extends Activity {
 //            } else {
 //                retryPlayer(extra);
 //            }
-//            mLoading.setVisibility(View.GONE);
+            mLoading.setVisibility(View.GONE);
 //            videoPlayEnd();
 
             return false;
@@ -923,7 +921,7 @@ public class MainActivity2 extends Activity {
 
         if (mVideoSurfaceView != null) {
             mVideoSurfaceView.pause();
-            mPause = true;
+            mPause = 1;
         }
     }
 
@@ -933,7 +931,7 @@ public class MainActivity2 extends Activity {
 
         if (mVideoSurfaceView != null) {
             mVideoSurfaceView.start();
-            mPause = false;
+            mPause = 0;
         }
     }
 
@@ -949,15 +947,21 @@ public class MainActivity2 extends Activity {
     private View.OnClickListener mStartBtnListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            mPause = !mPause;
             hidePanel();
-            if (mPause) {
+            if (mPause == 0) {
+                mPause = 1;
+                mPlayerStartBtn.setBackgroundResource(R.drawable.pause);
+                mVideoSurfaceView.start();
+            } else if (mPause == 1) {
+                mPause = 0;
                 mPlayerStartBtn.setBackgroundResource(R.drawable.play);
                 mVideoSurfaceView.pause();
             } else {
+                mPause = 0;
                 mPlayerStartBtn.setBackgroundResource(R.drawable.pause);
-                mVideoSurfaceView.start();
-
+                resetPlayer();
+                playTv(mTvModels.get(curPosition).getUrl());
+                isChanged = false;
             }
         }
     };
