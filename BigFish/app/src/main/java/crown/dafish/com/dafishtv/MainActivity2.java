@@ -149,6 +149,10 @@ public class MainActivity2 extends Activity {
     // 声音调节Toast
     private VolumnController volumnController;
 
+    private int errCount = 0;
+    private int maxErrorCount = 20;
+    private boolean displayRetryDialog = false;
+
     private LinearLayout voiceControlLayout;
 
 
@@ -468,6 +472,9 @@ public class MainActivity2 extends Activity {
 
 //        backgroundImageView.setVisibility(View.VISIBLE);
 
+        errCount = 0;
+        displayRetryDialog = false;
+
         //当前有视频正在播放，需先停止当前播放
         mVideoSurfaceView.stop();
         //重置播放
@@ -637,7 +644,7 @@ public class MainActivity2 extends Activity {
     private IMediaPlayer.OnCompletionListener mOnCompletionListener = new IMediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(IMediaPlayer mp) {
-//            Toast.makeText(MainActivity2.this, "节目已播放完毕", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity2.this, "节目已播放完毕", Toast.LENGTH_LONG).show();
 //            mDrawerLayout.openDrawer(GravityCompat.START);
             mLoading.setVisibility(View.GONE);
 //            videoPlayEnd();
@@ -678,6 +685,34 @@ public class MainActivity2 extends Activity {
         public boolean onInfo(IMediaPlayer iMediaPlayer, int i, int i1) {
 
             String error = "";
+            Log.e(TAG, "OnInfoListener, i:" + i);
+
+            if (i ==  KSYMediaPlayer.MEDIA_INFO_BUFFERING_START
+                    || i == KSYMediaPlayer.MEDIA_INFO_BUFFERING_END) {
+                if (errCount >= maxErrorCount) {
+                    errCount = 0;
+                    if (!isChanged) {
+                        isChanged = true;
+                        error = "错误码：" + i + "! 切换到备用播放源！";
+                        Toast.makeText(MainActivity2.this, error, Toast.LENGTH_LONG).show();
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
+                        resetPlayer();
+                        playTv(mTvModels.get(curPosition).getBackupSource());
+                    } else {
+                        if (!displayRetryDialog) {
+                            displayRetryDialog = true;
+                            retryPlayer(i);
+                        } else {
+                            mVideoSurfaceView.stop();
+                            Toast.makeText(MainActivity2.this, "播放出错！", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                } else {
+                    errCount++;
+                }
+            } else {
+                errCount = 0;
+            }
 
             switch (i) {
                 case KSYMediaPlayer.MEDIA_INFO_SUGGEST_RELOAD:
@@ -758,8 +793,22 @@ public class MainActivity2 extends Activity {
                     break;
                 default:
                     Log.e(TAG, "OnErrorListener, Error:" + what + ",extra:" + extra);
+                    Toast.makeText(MainActivity2.this, "播放失败！(extra:)" + extra, Toast.LENGTH_LONG).show();
             }
-            mLoading.setVisibility(View.GONE);
+
+//            Log.e(TAG, "OnErrorListener, Error Unknown:" + what + ",extra:" + extra);
+//            String error = "";
+//            if (!isChanged) {
+//                isChanged = true;
+//                error = "错误码：" + extra + "! 切换到备用播放源！";
+//                Toast.makeText(MainActivity2.this, error, Toast.LENGTH_LONG).show();
+//                mDrawerLayout.closeDrawer(GravityCompat.START);
+//                resetPlayer();
+//                playTv(mTvModels.get(curPosition).getBackupSource());
+//            } else {
+//                retryPlayer(extra);
+//            }
+//            mLoading.setVisibility(View.GONE);
 //            videoPlayEnd();
 
             return false;
@@ -1301,6 +1350,7 @@ public class MainActivity2 extends Activity {
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 resetPlayer();
                 playTv(mTvModels.get(curPosition).getUrl());
+                displayRetryDialog = false;
             }
         });
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
