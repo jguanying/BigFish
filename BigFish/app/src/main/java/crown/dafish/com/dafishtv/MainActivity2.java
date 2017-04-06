@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -76,6 +77,7 @@ import crown.dafish.com.utils.Constants;
 import crown.dafish.com.utils.ConvertUtil;
 import crown.dafish.com.utils.DensityUtil;
 import crown.dafish.com.utils.LocalCacheUtil;
+import crown.dafish.com.utils.MyBitmapUtils;
 import crown.dafish.com.utils.Util;
 import crown.dafish.com.view.ScrollViewEx;
 import crown.dafish.com.view.TimeBar;
@@ -227,6 +229,7 @@ public class MainActivity2 extends Activity {
 
     private boolean isProgramScroll = false;
 
+    public MyBitmapUtils bitmapUtils;
 
     //是否第一次点击
     private int clickCount = 0;
@@ -244,12 +247,14 @@ public class MainActivity2 extends Activity {
 
         CrashReport.initCrashReport(getApplicationContext(), "faf1388c3a", true);
 
+        // 初始化图片加载控件
+        initImageLoaderConfiguration();
+
         init();
         initPlayer();
 //        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 //        navigationView.setNavigationItemSelectedListener(this);
-        // 初始化图片加载控件
-        initImageLoaderConfiguration();
+
     }
 
     private void init() {
@@ -413,6 +418,12 @@ public class MainActivity2 extends Activity {
 
         backgroundImageView = (ImageView)findViewById(R.id.background_imageview);
 
+        SharedPreferences sp = getSharedPreferences("BigFish", Context.MODE_PRIVATE);
+        String backgroundURL = sp.getString("backgroundURL", null);
+
+        bitmapUtils = new MyBitmapUtils();
+        bitmapUtils.display(backgroundImageView, backgroundURL, R.drawable.background);
+
     }
 
     private void initPlayer() {
@@ -511,9 +522,17 @@ public class MainActivity2 extends Activity {
                     Log.d(TAG,"channel: " + response);
 //                    response = "{ \"programs\" : [ { \"logo\" : \"bj.png\", \"title\" : \"北京\", \"source\" : \"http://103.198.18.22:8088/live/bjtv.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"beijingstv\" }, { \"logo\" : \"gd.png\", \"title\" : \"广东\", \"source\" : \"http://103.198.18.22:8088/live/ngdtvsd.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"gd\" }, { \"logo\" : \"df.png\", \"title\" : \"东方\", \"source\" : \"http://103.198.18.22:8088/live/ndftvhd.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"df\" }, { \"logo\" : \"sr.png\", \"title\" : \"卡酷卡通\", \"source\" : \"http://103.198.18.22:8088/live/kkdh.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"kakukaton\" }, { \"logo\" : \"dsj.png\", \"title\" : \"古装剧场\", \"source\" : \"http://103.198.18.22:8088/live/gtjc.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"guzhuangjc\" }, { \"logo\" : \"zy.png\", \"title\" : \"赛事\", \"source\" : \"http://103.198.18.22:8088/live/wpzy.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"saishijx\" }, { \"logo\" : \"xw.png\", \"title\" : \"cctv-2\", \"source\" : \"http://103.198.18.22:8082/TV4020.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"cctv-2\" }, { \"logo\" : \"cj.png\", \"title\" : \"cctv-3\", \"source\" : \"http://103.198.18.22:8082/TV4013.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"cctv-3\"}, { \"logo\" : \"ms.png\", \"title\" : \"描述\", \"source\" : \"http://103.198.18.22:8082/TV3005.m3u8\", \"epg\" : \"http://crown.da-fish.com:8888/service/program\", \"uuid\" : \"saishijx\"} ], \"info\" : { \"version\" : 1, \"customer\" : \"Crown\" } }";
                     mChannel = gson.fromJson(response, Channel.class);
-                    ImageLoader imageLoader = ImageLoader.getInstance();
-                    imageLoader.displayImage(Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getLogo(), logoImageView);
-                    imageLoader.displayImage(Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getBackground(), backgroundImageView);
+//                    ImageLoader imageLoader = ImageLoader.getInstance();
+//                    imageLoader.displayImage(Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getLogo(), logoImageView);
+//                    imageLoader.displayImage(Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getBackground(), backgroundImageView);
+
+                    SharedPreferences sp = getSharedPreferences("BigFish", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString("backgroundURL", Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getBackground());
+                    editor.commit();
+
+                    bitmapUtils.display(backgroundImageView, Constants.PROGRAM_ICON_URL + mChannel.getExtraInfo().getBackground(), R.drawable.background);
+
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
 //                    Toast.makeText(MainActivity2.this, "该设备未经过认证，请联系大鱼公司进行认证!", Toast.LENGTH_LONG).show();
