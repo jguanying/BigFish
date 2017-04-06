@@ -287,6 +287,7 @@ public class MainActivity2 extends Activity {
             }
         });
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -958,6 +959,7 @@ public class MainActivity2 extends Activity {
                 mVideoSurfaceView.pause();
             } else {
                 mPause = 0;
+                mPlayerStartBtn.setVisibility(View.GONE);
                 mPlayerStartBtn.setBackgroundResource(R.drawable.pause);
                 resetPlayer();
                 playTv(mTvModels.get(curPosition).getUrl());
